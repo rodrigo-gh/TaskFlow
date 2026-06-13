@@ -1,2 +1,5 @@
 <Solution>
+  <Folder Name="/TaskFlow.Api/">
+    <Project Path="TaskFlow.Api/TaskFlow.api.csproj" />
+  </Folder>
 </Solution>
