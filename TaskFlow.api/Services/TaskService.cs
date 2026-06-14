@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using TaskFlow.Api.Data;
 using TaskFlow.Api.DTOs;
 using TaskFlow.Api.Models;
@@ -13,17 +14,19 @@ public class TaskService : ITaskService
         _context = context;
     }
 
-    public List<TaskResponse> GetAll()
+    public async Task<List<TaskResponse>> GetAllAsync()
     {
-        return _context.Tasks
+        var tasks = await _context.Tasks
             .OrderByDescending(task => task.CreatedAt)
-            .Select(task => ToResponse(task))
-            .ToList();
+            .ToListAsync();
+
+        return tasks.Select(ToResponse).ToList();
     }
 
-    public TaskResponse? GetById(Guid id)
+    public async Task<TaskResponse?> GetByIdAsync(Guid id)
     {
-        var task = _context.Tasks.FirstOrDefault(task => task.Id == id);
+        var task = await _context.Tasks
+            .FirstOrDefaultAsync(task => task.Id == id);
 
         if (task is null)
         {
@@ -33,7 +36,7 @@ public class TaskService : ITaskService
         return ToResponse(task);
     }
 
-    public TaskResponse Create(CreateTaskRequest request)
+    public async Task<TaskResponse> CreateAsync(CreateTaskRequest request)
     {
         var task = new TaskItem
         {
@@ -45,15 +48,16 @@ public class TaskService : ITaskService
             UpdatedAt = null
         };
 
-        _context.Tasks.Add(task);
-        _context.SaveChanges();
+        await _context.Tasks.AddAsync(task);
+        await _context.SaveChangesAsync();
 
         return ToResponse(task);
     }
 
-    public TaskResponse? Update(Guid id, UpdateTaskRequest request)
+    public async Task<TaskResponse?> UpdateAsync(Guid id, UpdateTaskRequest request)
     {
-        var task = _context.Tasks.FirstOrDefault(task => task.Id == id);
+        var task = await _context.Tasks
+            .FirstOrDefaultAsync(task => task.Id == id);
 
         if (task is null)
         {
@@ -65,14 +69,15 @@ public class TaskService : ITaskService
         task.IsCompleted = request.IsCompleted;
         task.UpdatedAt = DateTime.UtcNow;
 
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return ToResponse(task);
     }
 
-    public bool Delete(Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
-        var task = _context.Tasks.FirstOrDefault(task => task.Id == id);
+        var task = await _context.Tasks
+            .FirstOrDefaultAsync(task => task.Id == id);
 
         if (task is null)
         {
@@ -80,7 +85,7 @@ public class TaskService : ITaskService
         }
 
         _context.Tasks.Remove(task);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return true;
     }

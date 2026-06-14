@@ -16,17 +16,17 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<List<TaskResponse>> GetAll()
+    public async Task<ActionResult<List<TaskResponse>>> GetAll()
     {
-        var tasks = _taskService.GetAll();
+        var tasks = await _taskService.GetAllAsync();
 
         return Ok(tasks);
     }
 
     [HttpGet("{id:guid}")]
-    public ActionResult<TaskResponse> GetById(Guid id)
+    public async Task<ActionResult<TaskResponse>> GetById(Guid id)
     {
-        var task = _taskService.GetById(id);
+        var task = await _taskService.GetByIdAsync(id);
 
         if (task is null)
         {
@@ -37,17 +37,17 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<TaskResponse> Create(CreateTaskRequest request)
+    public async Task<ActionResult<TaskResponse>> Create(CreateTaskRequest request)
     {
-        var task = _taskService.Create(request);
+        var task = await _taskService.CreateAsync(request);
 
         return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
     }
 
     [HttpPut("{id:guid}")]
-    public ActionResult<TaskResponse> Update(Guid id, UpdateTaskRequest request)
+    public async Task<ActionResult<TaskResponse>> Update(Guid id, UpdateTaskRequest request)
     {
-        var task = _taskService.Update(id, request);
+        var task = await _taskService.UpdateAsync(id, request);
 
         if (task is null)
         {
@@ -58,9 +58,9 @@ public class TasksController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    public IActionResult Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id)
     {
-        var deleted = _taskService.Delete(id);
+        var deleted = await _taskService.DeleteAsync(id);
 
         if (!deleted)
         {

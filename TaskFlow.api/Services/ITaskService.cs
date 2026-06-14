@@ -4,9 +4,13 @@ namespace TaskFlow.Api.Services;
 
 public interface ITaskService
 {
-    List<TaskResponse> GetAll();
-    TaskResponse? GetById(Guid id);
-    TaskResponse Create(CreateTaskRequest request);
-    TaskResponse? Update(Guid id, UpdateTaskRequest request);
-    bool Delete(Guid id);
+    Task<List<TaskResponse>> GetAllAsync();
+
+    Task<TaskResponse?> GetByIdAsync(Guid id);
+
+    Task<TaskResponse> CreateAsync(CreateTaskRequest request);
+
+    Task<TaskResponse?> UpdateAsync(Guid id, UpdateTaskRequest request);
+
+    Task<bool> DeleteAsync(Guid id);
 }
