@@ -57,6 +57,32 @@ public class TasksController : ControllerBase
         return Ok(task);
     }
 
+    [HttpPatch("{id:guid}/complete")]
+    public async Task<ActionResult<TaskResponse>> Complete(Guid id)
+    {
+        var task = await _taskService.CompleteAsync(id);
+
+        if (task is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(task);
+    }
+
+    [HttpPatch("{id:guid}/reopen")]
+    public async Task<ActionResult<TaskResponse>> Reopen(Guid id)
+    {
+        var task = await _taskService.ReopenAsync(id);
+
+        if (task is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(task);
+    }
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {

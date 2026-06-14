@@ -12,5 +12,9 @@ public interface ITaskService
 
     Task<TaskResponse?> UpdateAsync(Guid id, UpdateTaskRequest request);
 
+    Task<TaskResponse?> CompleteAsync(Guid id);
+
+    Task<TaskResponse?> ReopenAsync(Guid id);
+
     Task<bool> DeleteAsync(Guid id);
 }

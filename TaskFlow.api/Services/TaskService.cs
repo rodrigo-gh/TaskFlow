@@ -74,6 +74,42 @@ public class TaskService : ITaskService
         return ToResponse(task);
     }
 
+    public async Task<TaskResponse?> CompleteAsync(Guid id)
+    {
+        var task = await _context.Tasks
+            .FirstOrDefaultAsync(task => task.Id == id);
+
+        if (task is null)
+        {
+            return null;
+        }
+
+        task.IsCompleted = true;
+        task.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return ToResponse(task);
+    }
+
+    public async Task<TaskResponse?> ReopenAsync(Guid id)
+    {
+        var task = await _context.Tasks
+            .FirstOrDefaultAsync(task => task.Id == id);
+
+        if (task is null)
+        {
+            return null;
+        }
+
+        task.IsCompleted = false;
+        task.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return ToResponse(task);
+    }
+
     public async Task<bool> DeleteAsync(Guid id)
     {
         var task = await _context.Tasks
