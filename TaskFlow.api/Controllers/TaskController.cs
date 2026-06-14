@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using TaskFlow.Api.DTOs;
 using TaskFlow.Api.Models;
 
 namespace TaskFlow.Api.Controllers;
@@ -10,13 +11,14 @@ public class TaskController : ControllerBase
     private static readonly List<TaskItem> Tasks = [];
 
     [HttpGet]
-    public ActionResult<List<TaskItem>> GetAll()
+    public ActionResult<List<TaskResponse>> GetAll()
     {
-        return Ok(Tasks);
+        var response = Tasks.Select(ToResponse).ToList();
+        return Ok(response);
     }
 
     [HttpGet("{id:guid}")]
-    public ActionResult<TaskItem> GetById(Guid id)
+    public ActionResult<TaskResponse> GetById(Guid id)
     {
         var task = Tasks.FirstOrDefault(task => task.Id == id);
 
@@ -25,23 +27,31 @@ public class TaskController : ControllerBase
             return NotFound();
         }
 
-        return Ok(task);
+        return Ok(ToResponse(task));
     }
 
     [HttpPost]
-    public ActionResult<TaskItem> Create(TaskItem task)
+    public ActionResult<TaskResponse> Create(CreateTasksRequest request)
     {
-        task.Id = Guid.NewGuid();
-        task.CreatedAt = DateTime.UtcNow;
-        task.UpdatedAt = null;
+        var task = new TaskItem
+        {
+            Id = Guid.NewGuid(),
+            Title = request.Title,
+            Description = request.Description,
+            IsCompleted = false,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = null
+        };
 
         Tasks.Add(task);
 
-        return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
+        var response = ToResponse(task);
+
+        return CreatedAtAction(nameof(GetById), new { id = task.Id }, response);
     }
 
     [HttpPut("{id:guid}")]
-    public ActionResult<TaskItem> Update(Guid id, TaskItem updatedTask)
+    public ActionResult<TaskResponse> Update(Guid id, UpdateTaskRequest request)
     {
         var task = Tasks.FirstOrDefault(task => task.Id == id);
         if (task is null)
@@ -49,12 +59,12 @@ public class TaskController : ControllerBase
             return NotFound();
         }
 
-        task.Title = updatedTask.Title;
-        task.Description = updatedTask.Description;
-        task.IsCompleted = updatedTask.IsCompleted;
+        task.Title = request.Title;
+        task.Description = request.Description;
+        task.IsCompleted = request.IsCompleted;
         task.UpdatedAt = DateTime.UtcNow;
 
-        return Ok(task);
+        return Ok(ToResponse(task));
     }
 
     [HttpDelete("{id:guid}")]
@@ -70,6 +80,19 @@ public class TaskController : ControllerBase
         Tasks.Remove(task);
 
         return NoContent();
+    }
+
+    private static TaskResponse ToResponse(TaskItem task)
+    {
+        return new TaskResponse
+        {
+            Id = task.Id,
+            Title = task.Title,
+            Description = task.Description,
+            IsCompleted = task.IsCompleted,
+            CreatedAt = task.CreatedAt,
+            UpdatedAt = task.UpdatedAt
+        };
     }
 
 }
