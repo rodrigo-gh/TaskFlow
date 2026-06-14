@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Api.DTOs;
+using TaskFlow.Api.Enums;
 using TaskFlow.Api.Services;
 
 namespace TaskFlow.Api.Controllers;
@@ -16,9 +17,10 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<TaskResponse>>> GetAll()
+    public async Task<ActionResult<List<TaskResponse>>> GetAll(
+        [FromQuery] TaskStatusFilter status = TaskStatusFilter.All)
     {
-        var tasks = await _taskService.GetAllAsync();
+        var tasks = await _taskService.GetAllAsync(status);
 
         return Ok(tasks);
     }

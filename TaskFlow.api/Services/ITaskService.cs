@@ -1,10 +1,11 @@
 using TaskFlow.Api.DTOs;
+using TaskFlow.Api.Enums;
 
 namespace TaskFlow.Api.Services;
 
 public interface ITaskService
 {
-    Task<List<TaskResponse>> GetAllAsync();
+    Task<List<TaskResponse>> GetAllAsync(TaskStatusFilter status);
 
     Task<TaskResponse?> GetByIdAsync(Guid id);
 

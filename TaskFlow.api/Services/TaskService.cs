@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TaskFlow.Api.Data;
 using TaskFlow.Api.DTOs;
+using TaskFlow.Api.Enums;
 using TaskFlow.Api.Models;
 
 namespace TaskFlow.Api.Services;
@@ -14,9 +15,18 @@ public class TaskService : ITaskService
         _context = context;
     }
 
-    public async Task<List<TaskResponse>> GetAllAsync()
+    public async Task<List<TaskResponse>> GetAllAsync(TaskStatusFilter status)
     {
-        var tasks = await _context.Tasks
+        var query = _context.Tasks.AsQueryable();
+
+        query = status switch
+        {
+            TaskStatusFilter.Pending => query.Where(task => !task.IsCompleted),
+            TaskStatusFilter.Completed => query.Where(task => task.IsCompleted),
+            _ => query
+        };
+
+        var tasks = await query
             .OrderByDescending(task => task.CreatedAt)
             .ToListAsync();
 
