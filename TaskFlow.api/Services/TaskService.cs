@@ -1,3 +1,4 @@
+using TaskFlow.Api.Data;
 using TaskFlow.Api.DTOs;
 using TaskFlow.Api.Models;
 
@@ -5,16 +6,24 @@ namespace TaskFlow.Api.Services;
 
 public class TaskService : ITaskService
 {
-    private static readonly List<TaskItem> Tasks = [];
+    private readonly AppDbContext _context;
+
+    public TaskService(AppDbContext context)
+    {
+        _context = context;
+    }
 
     public List<TaskResponse> GetAll()
     {
-        return Tasks.Select(ToResponse).ToList();
+        return _context.Tasks
+            .OrderByDescending(task => task.CreatedAt)
+            .Select(task => ToResponse(task))
+            .ToList();
     }
 
     public TaskResponse? GetById(Guid id)
     {
-        var task = Tasks.FirstOrDefault(task => task.Id == id);
+        var task = _context.Tasks.FirstOrDefault(task => task.Id == id);
 
         if (task is null)
         {
@@ -36,14 +45,15 @@ public class TaskService : ITaskService
             UpdatedAt = null
         };
 
-        Tasks.Add(task);
+        _context.Tasks.Add(task);
+        _context.SaveChanges();
 
         return ToResponse(task);
     }
 
     public TaskResponse? Update(Guid id, UpdateTaskRequest request)
     {
-        var task = Tasks.FirstOrDefault(task => task.Id == id);
+        var task = _context.Tasks.FirstOrDefault(task => task.Id == id);
 
         if (task is null)
         {
@@ -55,19 +65,22 @@ public class TaskService : ITaskService
         task.IsCompleted = request.IsCompleted;
         task.UpdatedAt = DateTime.UtcNow;
 
+        _context.SaveChanges();
+
         return ToResponse(task);
     }
 
     public bool Delete(Guid id)
     {
-        var task = Tasks.FirstOrDefault(task => task.Id == id);
+        var task = _context.Tasks.FirstOrDefault(task => task.Id == id);
 
         if (task is null)
         {
             return false;
         }
 
-        Tasks.Remove(task);
+        _context.Tasks.Remove(task);
+        _context.SaveChanges();
 
         return true;
     }
