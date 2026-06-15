@@ -32,7 +32,7 @@ public class TasksController : ControllerBase
 
         if (task is null)
         {
-            return NotFound();
+            return TaskNotFound();
         }
 
         return Ok(task);
@@ -53,7 +53,7 @@ public class TasksController : ControllerBase
 
         if (task is null)
         {
-            return NotFound();
+            return TaskNotFound();
         }
 
         return Ok(task);
@@ -66,7 +66,7 @@ public class TasksController : ControllerBase
 
         if (task is null)
         {
-            return NotFound();
+            return TaskNotFound();
         }
 
         return Ok(task);
@@ -79,7 +79,7 @@ public class TasksController : ControllerBase
 
         if (task is null)
         {
-            return NotFound();
+            return TaskNotFound();
         }
 
         return Ok(task);
@@ -92,9 +92,17 @@ public class TasksController : ControllerBase
 
         if (!deleted)
         {
-            return NotFound();
+            return TaskNotFound();
         }
 
         return NoContent();
+    }
+
+    private NotFoundObjectResult TaskNotFound()
+    {
+        return NotFound(new ErrorResponse
+        {
+            Message = "Task not found."
+        });
     }
 }
