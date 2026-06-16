@@ -4,6 +4,20 @@ TaskFlow is a study project built to practice Flutter, GetX, REST API integratio
 
 The project is being developed as a small full-stack task management application, with a Flutter mobile app consuming an ASP.NET Core REST API.
 
+## Screenshots
+
+| Task List | Create Task |
+|---|---|
+| ![Task List](docs/screenshots/app-task-list.png) | ![Create Task](docs/screenshots/app-create-task.png) |
+
+| Edit Task | Delete Confirmation |
+|---|---|
+| ![Edit Task](docs/screenshots/app-edit-task.png) | ![Delete Confirmation](docs/screenshots/app-delete-confirmation.png) |
+
+| Swagger | Completed Filter |
+|---|---|
+| ![Swagger](docs/screenshots/api-swagger.png) | ![Completed Filter](docs/screenshots/app-filter-completed.png) |
+
 ## Tech Stack
 
 ### Backend

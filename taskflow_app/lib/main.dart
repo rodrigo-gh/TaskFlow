@@ -15,6 +15,7 @@ class TaskFlowApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'TaskFlow',
+      debugShowCheckedModeBanner: false,
       // debugShowCheckedModeBanner: false,
       initialBinding: InitialBinding(),
       initialRoute: AppPages.initial,
