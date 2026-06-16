@@ -76,9 +76,10 @@ class TaskListPage extends GetView<TaskController> {
                 separatorBuilder: (_, __) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   final task = controller.tasks[index];
-
+                  final isActionLoading = controller.isActionLoading.value;
                   return _TaskTile(
                     task: task,
+                    isActionLoading: isActionLoading,
                     onToggleStatus: () => controller.toggleTaskStatus(task),
                     onDelete: () => _confirmDelete(task),
                     onEdit: () =>
@@ -130,9 +131,11 @@ class _TaskTile extends StatelessWidget {
     required this.onToggleStatus,
     required this.onDelete,
     required this.onEdit,
+    required this.isActionLoading,
   });
 
   final TaskModel task;
+  final bool isActionLoading;
   final VoidCallback onToggleStatus;
   final VoidCallback onDelete;
   final VoidCallback onEdit;
@@ -141,10 +144,10 @@ class _TaskTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        onTap: onEdit,
+        onTap: isActionLoading ? null : onEdit,
         leading: Checkbox(
           value: task.isCompleted,
-          onChanged: (_) => onToggleStatus(),
+          onChanged: isActionLoading ? null : (_) => onToggleStatus(),
         ),
         title: Text(
           task.title,
@@ -157,21 +160,27 @@ class _TaskTile extends StatelessWidget {
         subtitle: task.description == null || task.description!.isEmpty
             ? null
             : Text(task.description!),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) {
-            if (value == 'edit') {
-              onEdit();
-            }
+        trailing: isActionLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    onEdit();
+                  }
 
-            if (value == 'delete') {
-              onDelete();
-            }
-          },
-          itemBuilder: (context) => const [
-            PopupMenuItem(value: 'edit', child: Text('Editar')),
-            PopupMenuItem(value: 'delete', child: Text('Excluir')),
-          ],
-        ),
+                  if (value == 'delete') {
+                    onDelete();
+                  }
+                },
+                itemBuilder: (context) => const [
+                  PopupMenuItem(value: 'edit', child: Text('Editar')),
+                  PopupMenuItem(value: 'delete', child: Text('Excluir')),
+                ],
+              ),
       ),
     );
   }

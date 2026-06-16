@@ -21,8 +21,6 @@ class _TaskFormPageState extends State<TaskFormPage> {
 
   late final TaskModel? _task;
 
-  bool _isSaving = false;
-
   bool get _isEditing => _task != null;
 
   @override
@@ -54,10 +52,6 @@ class _TaskFormPageState extends State<TaskFormPage> {
       return;
     }
 
-    setState(() {
-      _isSaving = true;
-    });
-
     final bool saved;
 
     if (_isEditing) {
@@ -77,10 +71,6 @@ class _TaskFormPageState extends State<TaskFormPage> {
       return;
     }
 
-    setState(() {
-      _isSaving = false;
-    });
-
     if (saved) {
       Get.back();
 
@@ -97,9 +87,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? 'Editar tarefa' : 'Nova tarefa'),
-      ),
+      appBar: AppBar(title: Text(_isEditing ? 'Editar tarefa' : 'Nova tarefa')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -153,16 +141,20 @@ class _TaskFormPageState extends State<TaskFormPage> {
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
-                child: FilledButton(
-                  onPressed: _isSaving ? null : _saveTask,
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(_isEditing ? 'Salvar alterações' : 'Salvar'),
-                ),
+                child: Obx(() {
+                  final isSaving = _taskController.isActionLoading.value;
+
+                  return FilledButton(
+                    onPressed: isSaving ? null : _saveTask,
+                    child: isSaving
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(_isEditing ? 'Salvar alterações' : 'Salvar'),
+                  );
+                }),
               ),
             ],
           ),

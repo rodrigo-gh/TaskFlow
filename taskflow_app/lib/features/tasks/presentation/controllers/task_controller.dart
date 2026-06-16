@@ -14,6 +14,8 @@ class TaskController extends GetxController {
 
   final RxBool isLoading = false.obs;
 
+  final RxBool isActionLoading = false.obs;
+
   final RxnString errorMessage = RxnString();
 
   final Rx<TaskStatusFilter> selectedFilter = TaskStatusFilter.all.obs;
@@ -47,7 +49,12 @@ class TaskController extends GetxController {
   }
 
   Future<void> toggleTaskStatus(TaskModel task) async {
+    if (isActionLoading.value) {
+      return;
+    }
+
     try {
+      isActionLoading.value = true;
       errorMessage.value = null;
 
       if (task.isCompleted) {
@@ -65,11 +72,19 @@ class TaskController extends GetxController {
         'Erro inesperado ao atualizar tarefa.',
         snackPosition: SnackPosition.BOTTOM,
       );
+    } finally {
+      isActionLoading.value = false;
     }
   }
 
   Future<void> deleteTask(TaskModel task) async {
+    if (isActionLoading.value) {
+      return;
+    }
+
     try {
+      isActionLoading.value = true;
+
       await _repository.deleteTask(task.id);
 
       tasks.removeWhere((item) => item.id == task.id);
@@ -87,11 +102,19 @@ class TaskController extends GetxController {
         'Erro inesperado ao remover tarefa.',
         snackPosition: SnackPosition.BOTTOM,
       );
+    } finally {
+      isActionLoading.value = false;
     }
   }
 
   Future<bool> createTask({required String title, String? description}) async {
+    if (isActionLoading.value) {
+      return false;
+    }
+
     try {
+      isActionLoading.value = true;
+
       final trimmedDescription = description?.trim();
 
       final task = await _repository.createTask(
@@ -116,6 +139,8 @@ class TaskController extends GetxController {
       );
 
       return false;
+    } finally {
+      isActionLoading.value = false;
     }
   }
 
@@ -124,7 +149,13 @@ class TaskController extends GetxController {
     required String title,
     String? description,
   }) async {
+    if (isActionLoading.value) {
+      return false;
+    }
+
     try {
+      isActionLoading.value = true;
+
       final trimmedDescription = description?.trim();
 
       final updatedTask = await _repository.updateTask(
@@ -155,6 +186,8 @@ class TaskController extends GetxController {
       );
 
       return false;
+    } finally {
+      isActionLoading.value = false;
     }
   }
 }
