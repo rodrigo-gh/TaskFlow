@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:taskflow_app/app/bindings/initial_binding.dart';
 
 import 'app/routes/app_pages.dart';
 
@@ -15,6 +16,7 @@ class TaskFlowApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'TaskFlow',
       // debugShowCheckedModeBanner: false,
+      initialBinding: InitialBinding(),
       initialRoute: AppPages.initial,
       getPages: AppPages.routes,
       theme: ThemeData(
