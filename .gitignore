@@ -486,3 +486,5 @@ $RECYCLE.BIN/
 
 # FVM Version Cache
 .fvm/
+
+.vscode/launch.json

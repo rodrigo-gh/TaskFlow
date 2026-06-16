@@ -251,13 +251,210 @@ docs(api): improve Swagger documentation
 docs: add API setup instructions
 ```
 
-## Next Steps
+## Flutter App Setup
 
-* Build the Flutter app
-* Configure GetX routes and bindings
-* Create task repository in Flutter
-* Consume the ASP.NET Core API
-* Implement task list, create, update, complete, reopen and delete flows
+The Flutter app is located inside:
+
+```text
+taskflow_app/
+```
+
+### Requirements
+
+* Flutter SDK
+* Android Studio or VS Code
+* Android device/emulator or iOS Simulator
+* TaskFlow API running locally
+
+Check your Flutter installation:
+
+```bash
+flutter doctor
+```
+
+Install Flutter dependencies:
+
+```bash
+cd taskflow_app
+flutter pub get
+```
+
+## Running the Flutter App
+
+The app consumes the ASP.NET Core API using Dio.
+
+The API base URL is configured through `--dart-define`:
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://YOUR_API_HOST:5099
+```
+
+### Android physical device
+
+When using a physical Android device, `localhost` does not point to your computer. It points to the phone itself.
+
+First, find your Mac local IP:
+
+```bash
+ipconfig getifaddr en0
+```
+
+Example output:
+
+```text
+192.168.0.25
+```
+
+Run the API allowing external network access:
+
+```bash
+cd TaskFlow.api
+dotnet run --urls "http://0.0.0.0:5099"
+```
+
+Then run the Flutter app:
+
+```bash
+cd taskflow_app
+flutter run --dart-define=API_BASE_URL=http://192.168.0.25:5099
+```
+
+Replace `192.168.0.25` with your actual Mac IP address.
+
+### Android Emulator
+
+Use:
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5099
+```
+
+### iOS Simulator or macOS
+
+Use:
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://localhost:5099
+```
+
+## Running with VS Code
+
+This project can be launched through VS Code using `.vscode/launch.json`.
+
+Example configuration for a physical Android device:
+
+```json
+{
+  "name": "taskflow_app - Android físico",
+  "cwd": "taskflow_app",
+  "request": "launch",
+  "type": "dart",
+  "toolArgs": [
+    "--dart-define=API_BASE_URL=http://192.168.0.25:5099"
+  ]
+}
+```
+
+Replace the IP address with your Mac local IP.
+
+## Android Cleartext HTTP
+
+Because the project uses local HTTP during development, the Android app allows cleartext traffic in:
+
+```text
+taskflow_app/android/app/src/main/AndroidManifest.xml
+```
+
+Inside the `<application>` tag:
+
+```xml
+android:usesCleartextTraffic="true"
+```
+
+This is used only for local development.
+
+## Flutter App Features
+
+* List tasks from the API
+* Filter tasks by status:
+
+  * All
+  * Pending
+  * Completed
+* Create tasks
+* Edit tasks
+* Mark tasks as completed
+* Reopen completed tasks
+* Delete tasks with confirmation dialog
+* Loading states
+* Empty state
+* Error state
+* Pull to refresh
+* REST API integration with Dio
+* State management with GetX
+* Navigation with GetX routes
+* Dependency injection with GetX Bindings
+
+## Flutter Architecture
+
+The Flutter app follows a feature-based structure:
+
+```text
+lib/
+├── app/
+│   ├── bindings/
+│   ├── core/
+│   │   ├── constants/
+│   │   ├── errors/
+│   │   └── http/
+│   └── routes/
+├── features/
+│   └── tasks/
+│       ├── data/
+│       │   ├── models/
+│       │   └── repositories/
+│       └── presentation/
+│           ├── bindings/
+│           ├── controllers/
+│           ├── pages/
+│           └── widgets/
+└── main.dart
+```
+
+Main flow:
+
+```text
+Page
+↓
+GetX Controller
+↓
+Repository
+↓
+Dio Client
+↓
+ASP.NET Core API
+```
+
+## Main Flutter Dependencies
+
+* GetX
+* Dio
+
+## Development Notes
+
+The app uses `String.fromEnvironment` to read the API URL:
+
+```dart
+class ApiConstants {
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://localhost:5099',
+  );
+}
+```
+
+This avoids hardcoding local IP addresses in the source code.
+
 
 ```
 ```
