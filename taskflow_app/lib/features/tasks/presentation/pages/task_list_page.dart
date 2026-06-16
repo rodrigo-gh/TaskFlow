@@ -9,6 +9,29 @@ import '../controllers/task_controller.dart';
 class TaskListPage extends GetView<TaskController> {
   const TaskListPage({super.key});
 
+  Future<void> _confirmDelete(TaskModel task) async {
+    final shouldDelete = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Excluir tarefa'),
+        content: Text('Deseja excluir a tarefa "${task.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) {
+      await controller.deleteTask(task);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +80,7 @@ class TaskListPage extends GetView<TaskController> {
                   return _TaskTile(
                     task: task,
                     onToggleStatus: () => controller.toggleTaskStatus(task),
-                    onDelete: () => controller.deleteTask(task),
+                    onDelete: () => _confirmDelete(task),
                     onEdit: () =>
                         Get.toNamed(AppRoutes.taskForm, arguments: task),
                   );
@@ -134,27 +157,21 @@ class _TaskTile extends StatelessWidget {
         subtitle: task.description == null || task.description!.isEmpty
             ? null
             : Text(task.description!),
-trailing: PopupMenuButton<String>(
-  onSelected: (value) {
-    if (value == 'edit') {
-      onEdit();
-    }
+        trailing: PopupMenuButton<String>(
+          onSelected: (value) {
+            if (value == 'edit') {
+              onEdit();
+            }
 
-    if (value == 'delete') {
-      onDelete();
-    }
-  },
-  itemBuilder: (context) => const [
-    PopupMenuItem(
-      value: 'edit',
-      child: Text('Editar'),
-    ),
-    PopupMenuItem(
-      value: 'delete',
-      child: Text('Excluir'),
-    ),
-  ],
-),
+            if (value == 'delete') {
+              onDelete();
+            }
+          },
+          itemBuilder: (context) => const [
+            PopupMenuItem(value: 'edit', child: Text('Editar')),
+            PopupMenuItem(value: 'delete', child: Text('Excluir')),
+          ],
+        ),
       ),
     );
   }
