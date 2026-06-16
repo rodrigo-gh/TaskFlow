@@ -72,29 +72,35 @@ class TaskListPage extends GetView<TaskController> {
                   return const EmptyTasksState();
                 }
 
+                final tasks = controller.tasks.toList();
+
                 return RefreshIndicator(
                   onRefresh: controller.loadTasks,
                   child: ListView.separated(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-                    itemCount: controller.tasks.length,
+                    itemCount: tasks.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
-                      final task = controller.tasks[index];
-                      final isActionLoading =
-                          controller.isActionLoading.value;
+                      final task = tasks[index];
 
-                      return TaskTile(
-                        task: task,
-                        isActionLoading: isActionLoading,
-                        onToggleStatus: () =>
-                            controller.toggleTaskStatus(task),
-                        onDelete: () => _confirmDelete(task),
-                        onEdit: () => Get.toNamed(
-                          AppRoutes.taskForm,
-                          arguments: task,
-                        ),
-                      );
+                      return Obx(() {
+                        final isTaskLoading =
+                            controller.loadingTaskIds.contains(task.id);
+
+                        return TaskTile(
+                          key: ValueKey(task.id),
+                          task: task,
+                          isActionLoading: isTaskLoading,
+                          onToggleStatus: () =>
+                              controller.toggleTaskStatus(task),
+                          onDelete: () => _confirmDelete(task),
+                          onEdit: () => Get.toNamed(
+                            AppRoutes.taskForm,
+                            arguments: task,
+                          ),
+                        );
+                      });
                     },
                   ),
                 );

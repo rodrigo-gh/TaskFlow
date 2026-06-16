@@ -20,6 +20,8 @@ class TaskController extends GetxController {
 
   final Rx<TaskStatusFilter> selectedFilter = TaskStatusFilter.all.obs;
 
+  final RxSet<String> loadingTaskIds = <String>{}.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -49,21 +51,34 @@ class TaskController extends GetxController {
   }
 
   Future<void> toggleTaskStatus(TaskModel task) async {
-    if (isActionLoading.value) {
+    if (loadingTaskIds.contains(task.id)) {
       return;
     }
 
     try {
-      isActionLoading.value = true;
-      errorMessage.value = null;
+      loadingTaskIds.add(task.id);
 
-      if (task.isCompleted) {
-        await _repository.reopenTask(task.id);
-      } else {
-        await _repository.completeTask(task.id);
+      final updatedTask = task.isCompleted
+          ? await _repository.reopenTask(task.id)
+          : await _repository.completeTask(task.id);
+
+      final index = tasks.indexWhere((item) => item.id == updatedTask.id);
+
+      if (index != -1) {
+        final currentFilter = selectedFilter.value;
+
+        final shouldRemoveFromCurrentFilter =
+            currentFilter == TaskStatusFilter.pending &&
+                updatedTask.isCompleted ||
+            currentFilter == TaskStatusFilter.completed &&
+                !updatedTask.isCompleted;
+
+        if (shouldRemoveFromCurrentFilter) {
+          tasks.removeAt(index);
+        } else {
+          tasks[index] = updatedTask;
+        }
       }
-
-      await loadTasks();
     } on ApiException catch (error) {
       Get.snackbar('Erro', error.message, snackPosition: SnackPosition.BOTTOM);
     } catch (_) {
@@ -73,17 +88,17 @@ class TaskController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
-      isActionLoading.value = false;
+      loadingTaskIds.remove(task.id);
     }
   }
 
   Future<void> deleteTask(TaskModel task) async {
-    if (isActionLoading.value) {
+    if (loadingTaskIds.contains(task.id)) {
       return;
     }
 
     try {
-      isActionLoading.value = true;
+      loadingTaskIds.add(task.id);
 
       await _repository.deleteTask(task.id);
 
@@ -103,7 +118,7 @@ class TaskController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
-      isActionLoading.value = false;
+      loadingTaskIds.remove(task.id);
     }
   }
 
