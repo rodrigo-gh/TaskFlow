@@ -58,6 +58,8 @@ class TaskListPage extends GetView<TaskController> {
                     task: task,
                     onToggleStatus: () => controller.toggleTaskStatus(task),
                     onDelete: () => controller.deleteTask(task),
+                    onEdit: () =>
+                        Get.toNamed(AppRoutes.taskForm, arguments: task),
                   );
                 },
               );
@@ -104,16 +106,19 @@ class _TaskTile extends StatelessWidget {
     required this.task,
     required this.onToggleStatus,
     required this.onDelete,
+    required this.onEdit,
   });
 
   final TaskModel task;
   final VoidCallback onToggleStatus;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
+        onTap: onEdit,
         leading: Checkbox(
           value: task.isCompleted,
           onChanged: (_) => onToggleStatus(),
@@ -129,10 +134,27 @@ class _TaskTile extends StatelessWidget {
         subtitle: task.description == null || task.description!.isEmpty
             ? null
             : Text(task.description!),
-        trailing: IconButton(
-          onPressed: onDelete,
-          icon: const Icon(Icons.delete_outline),
-        ),
+trailing: PopupMenuButton<String>(
+  onSelected: (value) {
+    if (value == 'edit') {
+      onEdit();
+    }
+
+    if (value == 'delete') {
+      onDelete();
+    }
+  },
+  itemBuilder: (context) => const [
+    PopupMenuItem(
+      value: 'edit',
+      child: Text('Editar'),
+    ),
+    PopupMenuItem(
+      value: 'delete',
+      child: Text('Excluir'),
+    ),
+  ],
+),
       ),
     );
   }

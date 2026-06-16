@@ -118,4 +118,43 @@ class TaskController extends GetxController {
       return false;
     }
   }
+
+  Future<bool> updateTask({
+    required TaskModel task,
+    required String title,
+    String? description,
+  }) async {
+    try {
+      final trimmedDescription = description?.trim();
+
+      final updatedTask = await _repository.updateTask(
+        id: task.id,
+        title: title.trim(),
+        description: trimmedDescription == null || trimmedDescription.isEmpty
+            ? null
+            : trimmedDescription,
+        isCompleted: task.isCompleted,
+      );
+
+      final index = tasks.indexWhere((item) => item.id == updatedTask.id);
+
+      if (index != -1) {
+        tasks[index] = updatedTask;
+      }
+
+      return true;
+    } on ApiException catch (error) {
+      Get.snackbar('Erro', error.message, snackPosition: SnackPosition.BOTTOM);
+
+      return false;
+    } catch (_) {
+      Get.snackbar(
+        'Erro',
+        'Erro inesperado ao atualizar tarefa.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
+      return false;
+    }
+  }
 }

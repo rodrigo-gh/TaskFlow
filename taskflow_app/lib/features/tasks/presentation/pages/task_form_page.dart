@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../data/models/task_model.dart';
 import '../controllers/task_controller.dart';
 
 class TaskFormPage extends StatefulWidget {
@@ -18,7 +19,26 @@ class _TaskFormPageState extends State<TaskFormPage> {
 
   final _taskController = Get.find<TaskController>();
 
+  late final TaskModel? _task;
+
   bool _isSaving = false;
+
+  bool get _isEditing => _task != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final arguments = Get.arguments;
+
+    if (arguments is TaskModel) {
+      _task = arguments;
+      _titleController.text = _task!.title;
+      _descriptionController.text = _task.description ?? '';
+    } else {
+      _task = null;
+    }
+  }
 
   @override
   void dispose() {
@@ -38,10 +58,20 @@ class _TaskFormPageState extends State<TaskFormPage> {
       _isSaving = true;
     });
 
-    final created = await _taskController.createTask(
-      title: _titleController.text,
-      description: _descriptionController.text,
-    );
+    final bool saved;
+
+    if (_isEditing) {
+      saved = await _taskController.updateTask(
+        task: _task!,
+        title: _titleController.text,
+        description: _descriptionController.text,
+      );
+    } else {
+      saved = await _taskController.createTask(
+        title: _titleController.text,
+        description: _descriptionController.text,
+      );
+    }
 
     if (!mounted) {
       return;
@@ -51,12 +81,14 @@ class _TaskFormPageState extends State<TaskFormPage> {
       _isSaving = false;
     });
 
-    if (created) {
+    if (saved) {
       Get.back();
 
       Get.snackbar(
         'Sucesso',
-        'Tarefa criada com sucesso.',
+        _isEditing
+            ? 'Tarefa atualizada com sucesso.'
+            : 'Tarefa criada com sucesso.',
         snackPosition: SnackPosition.BOTTOM,
       );
     }
@@ -65,7 +97,9 @@ class _TaskFormPageState extends State<TaskFormPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nova tarefa')),
+      appBar: AppBar(
+        title: Text(_isEditing ? 'Editar tarefa' : 'Nova tarefa'),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -127,7 +161,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
                           height: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Salvar'),
+                      : Text(_isEditing ? 'Salvar alterações' : 'Salvar'),
                 ),
               ),
             ],
