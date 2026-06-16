@@ -29,9 +29,7 @@ class TaskController extends GetxController {
       isLoading.value = true;
       errorMessage.value = null;
 
-      final result = await _repository.getTasks(
-        status: selectedFilter.value,
-      );
+      final result = await _repository.getTasks(status: selectedFilter.value);
 
       tasks.assignAll(result);
     } on ApiException catch (error) {
@@ -60,11 +58,7 @@ class TaskController extends GetxController {
 
       await loadTasks();
     } on ApiException catch (error) {
-      Get.snackbar(
-        'Erro',
-        error.message,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Erro', error.message, snackPosition: SnackPosition.BOTTOM);
     } catch (_) {
       Get.snackbar(
         'Erro',
@@ -86,17 +80,42 @@ class TaskController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     } on ApiException catch (error) {
-      Get.snackbar(
-        'Erro',
-        error.message,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Erro', error.message, snackPosition: SnackPosition.BOTTOM);
     } catch (_) {
       Get.snackbar(
         'Erro',
         'Erro inesperado ao remover tarefa.',
         snackPosition: SnackPosition.BOTTOM,
       );
+    }
+  }
+
+  Future<bool> createTask({required String title, String? description}) async {
+    try {
+      final trimmedDescription = description?.trim();
+
+      final task = await _repository.createTask(
+        title: title.trim(),
+        description: trimmedDescription == null || trimmedDescription.isEmpty
+            ? null
+            : trimmedDescription,
+      );
+
+      tasks.insert(0, task);
+
+      return true;
+    } on ApiException catch (error) {
+      Get.snackbar('Erro', error.message, snackPosition: SnackPosition.BOTTOM);
+
+      return false;
+    } catch (_) {
+      Get.snackbar(
+        'Erro',
+        'Erro inesperado ao criar tarefa.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
+      return false;
     }
   }
 }

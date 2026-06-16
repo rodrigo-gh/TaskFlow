@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:taskflow_app/app/routes/app_routes.dart';
 
 import '../../data/models/task_model.dart';
 import '../../data/models/task_status_filter.dart';
@@ -20,15 +21,17 @@ class TaskListPage extends GetView<TaskController> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Get.toNamed(AppRoutes.taskForm),
+        child: const Icon(Icons.add),
+      ),
       body: Column(
         children: [
           _TaskFilterChips(controller: controller),
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
+                return const Center(child: CircularProgressIndicator());
               }
 
               final errorMessage = controller.errorMessage.value;
@@ -67,9 +70,7 @@ class TaskListPage extends GetView<TaskController> {
 }
 
 class _TaskFilterChips extends StatelessWidget {
-  const _TaskFilterChips({
-    required this.controller,
-  });
+  const _TaskFilterChips({required this.controller});
 
   final TaskController controller;
 
@@ -138,10 +139,7 @@ class _TaskTile extends StatelessWidget {
 }
 
 class _ErrorState extends StatelessWidget {
-  const _ErrorState({
-    required this.message,
-    required this.onRetry,
-  });
+  const _ErrorState({required this.message, required this.onRetry});
 
   final String message;
   final VoidCallback onRetry;
@@ -154,15 +152,9 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-            ),
+            const Icon(Icons.error_outline, size: 48),
             const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-            ),
+            Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: onRetry,
@@ -180,8 +172,6 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Nenhuma tarefa encontrada.'),
-    );
+    return const Center(child: Text('Nenhuma tarefa encontrada.'));
   }
 }
